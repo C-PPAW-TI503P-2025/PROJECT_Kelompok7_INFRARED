@@ -1,0 +1,58 @@
+@startuml
+!theme plain
+skinparam defaultTextAlignment center
+
+' --- DEFINISI SIMBOL AGAR SESUAI STANDAR ---
+skinparam activity {
+    BackgroundColor White
+    BorderColor Black
+    ArrowColor Black
+    FontName Arial
+}
+
+start
+
+' Simbol Jajar Genjang = INPUT
+:User Menekan Tombol Remote<
+note right: Input Manual
+
+' Simbol Jajar Genjang = INPUT
+:Sensor IR Menerima Sinyal<
+note right: Input Hardware
+
+' Simbol Persegi = PROSES
+:ESP32 Decode Kode Hex]
+
+' Simbol Belah Ketupat = DECISION
+if (Apakah Kode Terdaftar?) then (Tidak)
+    :Abaikan Sinyal]
+    stop
+else (Ya)
+    ' Simbol Persegi = PROSES
+    :Set Status Lampu (ON/OFF)]
+endif
+
+' Simbol Tabung = DATABASE
+:Simpan ke Firebase (Cloud DB)|
+note right: Storage
+
+' Simbol Jajar Genjang = OUTPUT (Kirim Data)
+:Broadcast Data ke Web<
+
+' Simbol Jajar Genjang = INPUT (Web Menerima)
+:Website Menerima Data Baru<
+
+' Simbol Belah Ketupat = DECISION
+if (Status == ON?) then (Ya)
+    ' Simbol Persegi = PROSES
+    :Set Gambar = Lampu Nyala]
+else (Tidak)
+    :Set Gambar = Lampu Mati]
+endif
+
+' Simbol Jajar Genjang = OUTPUT (Tampilan)
+:Render Tampilan di Layar Monitor/
+note right: Output Visual
+
+stop
+@enduml

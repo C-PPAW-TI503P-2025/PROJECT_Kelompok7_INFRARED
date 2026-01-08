@@ -1,0 +1,99 @@
+@startuml
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+
+title Class Diagram: Sistem Monitoring IoT (Sinkron dengan ERD)
+
+' --- PAKET 1: FIRMWARE (ESP32 / C++) ---
+package "Firmware (Hardware Logic)" {
+    
+    class "IR_Receiver_Driver" as Sensor {
+        - pin : int
+        - protocol : String
+        + setup() : void
+        + decodeSignal() : String
+    }
+
+    class "Main_Controller" as ESP32 {
+        - wifi_ssid : String
+        - wifi_pass : String
+        - firebase_host : String
+        - current_status : bool
+        --
+        + setupWiFi() : void
+        + connectFirebase() : void
+        + handleIRInput(hexCode: String) : void
+        + uploadStatus(status: String) : void
+    }
+}
+
+' --- PAKET 2: DATA LAYER (DATABASE MODELS) ---
+' Bagian ini sekarang PERSIS sama dengan ERD kamu
+package "Data Layer (Sesuai ERD)" {
+    
+    class "Admin" as AdminModel {
+        + admin_id : String
+        + email : String
+        + password : String
+    }
+
+    class "Virtual_Object" as ObjModel {
+        + object_id : String
+        + nama_objek : String
+        + status_sekarang : String
+        + terakhir_update : DateTime
+    }
+
+    class "Remote_Log" as LogModel {
+        + log_id : String
+        + object_id : String
+        + waktu_tekan : DateTime
+        + kode_ir_diterima : String
+        + status_setelahnya : String
+    }
+}
+
+' --- PAKET 3: WEB APPLICATION (FRONTEND) ---
+package "Web Application (Frontend)" {
+
+    class "Dashboard_UI" as View {
+        - canvas_element : Object
+        - current_image : String
+        --
+        + initFirebaseListener() : void
+        + renderImage(status: String) : void
+        + updateLogTable(logs: List) : void
+        + showNotification(msg: String) : void
+    }
+
+    class "Auth_Manager" as Auth {
+        - current_user : User
+        + login(email, pass) : bool
+        + logout() : void
+        + checkSession() : bool
+    }
+}
+
+' ===================================
+' HUBUNGAN ANTAR CLASS
+' ===================================
+
+' 1. Hubungan di Hardware
+ESP32 "1" --> "1" Sensor : uses >
+
+' 2. Hubungan ke Data (Dependency)
+ESP32 ..> ObjModel : updates (status_sekarang) >
+ESP32 ..> LogModel : creates (Remote_Log) >
+
+' 3. Hubungan di Web
+' Auth Manager mengecek data ke Model Admin
+Auth ..> AdminModel : verifies (email & password) >
+
+' Dashboard butuh Login dulu
+View ..> Auth : requires access >
+
+' Dashboard membaca data model
+View ..> ObjModel : reads (status_sekarang) >
+View ..> LogModel : reads (riwayat) >
+
+@enduml

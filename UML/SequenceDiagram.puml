@@ -1,0 +1,61 @@
+@startuml
+skinparam sequence {
+    ' --- STYLING ---
+    ArrowColor Black
+    
+    ' Mengatur garis vertikal (lifeline)
+    LifeLineBorderColor Black
+    LifeLineBackgroundColor White
+    
+    ' Mengatur Kotak Judul (Participant)
+    ParticipantBorderColor Black
+    ParticipantBackgroundColor #E3F2FD
+    ParticipantFontName Arial
+    ParticipantFontSize 14
+    
+    ' Jarak antar panah (Padding) agar lega
+    Padding 10
+}
+skinparam defaultFontName Arial
+
+title Sequence Diagram: Pengiriman Data (Tanpa Activation Bar)
+
+' --- DEFINISI PEMAIN ---
+participant "IoT Device\n(ESP32)" as ESP32
+participant "Firebase Cloud\n(Backend System)" as Backend
+database "Realtime DB\n(Storage)" as DB
+
+' --- ALUR PROSES ---
+
+' 1. PROSES DI ALAT
+' (Tanpa activate, langsung panah ke diri sendiri)
+ESP32 -> ESP32 : Terima Sinyal Remote\n& Decode Hex
+note left: Proses Internal\n(Hardware)
+
+' Jarak Kosong
+|||
+
+' 2. KIRIM KE CLOUD
+ESP32 -> Backend : Kirim Data Status (HTTPS)
+
+' 3. PROSES DI BACKEND
+Backend -> Backend : Validasi Token / Auth
+note right: Cek Keamanan
+
+' Jarak Kosong
+|||
+
+' 4. SIMPAN KE DATABASE
+Backend -> DB : Simpan Status ("ON"/"OFF")
+
+' 5. KONFIRMASI DARI DATABASE
+' (Garis putus-putus mendatar -->> tanda balasan)
+DB -->> Backend : Status Berhasil Disimpan
+
+' Jarak Kosong
+|||
+
+' 6. RESPON SUKSES KE ALAT
+Backend -->> ESP32 : Response Sukses (200 OK)
+
+@enduml
