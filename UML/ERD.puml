@@ -1,0 +1,45 @@
+@startuml
+skinparam linetype ortho
+skinparam entity {
+    BackgroundColor White
+    BorderColor Black
+    ArrowColor Black
+}
+
+' --- 1. TABEL UNTUK LOGIN (WAJIB ADA KARENA FLOWCHART) ---
+entity "Admin" as admin {
+    *admin_id : String <<PK>>
+    --
+    email : String
+    password : String
+}
+
+' --- 2. TABEL UNTUK STATUS LAMPU (YANG KAMU BUAT) ---
+entity "Virtual_Object" as object {
+    *object_id : String <<PK>>
+    --
+    nama_objek : String
+    status_sekarang : String
+    ' (Isinya: ON atau OFF)
+    terakhir_update : DateTime
+}
+
+' --- 3. TABEL RIWAYAT (YANG KAMU BUAT) ---
+entity "Remote_Log" as log {
+    *log_id : String <<PK>>
+    --
+    *object_id : String <<FK>>
+    waktu_tekan : DateTime
+    kode_ir_diterima : String
+    status_setelahnya : String
+}
+
+' --- HUBUNGAN ---
+
+' Satu Lampu punya banyak riwayat log
+object ||..o{ log : "memiliki riwayat"
+
+' Admin memantau Objek (Bisa dibuat putus-putus kalau tidak strict)
+admin }|..|{ object : "memantau"
+
+@enduml

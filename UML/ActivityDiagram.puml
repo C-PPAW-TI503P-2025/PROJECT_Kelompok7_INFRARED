@@ -1,0 +1,61 @@
+@startuml
+title Activity Diagram: Monitoring IoT (User Fisik & Admin Web)
+
+' --- SWIMLANES (AREA KERJA) ---
+|User (Fisik)|
+|Hardware (ESP32)|
+|Firebase / Database|
+|Admin (Web)|
+
+' --- BAGIAN 1: ADMIN LOGIN (PERSIAPAN) ---
+|Admin (Web)|
+start
+:Buka Halaman Web Admin;
+:Input Username & Password;
+
+if (Password Benar?) then (Tidak)
+    :Tampilkan Pesan Error;
+    detach
+else (Ya)
+    :Masuk ke Dashboard;
+    :Request Data Status Awal;
+endif
+
+|Firebase / Database|
+:Kirim Status Terakhir;
+
+|Admin (Web)|
+:Tampilkan Dashboard (Standby);
+note right
+  Admin sekarang dalam 
+  mode "Monitoring"
+end note
+
+' --- BAGIAN 2: USER BERAKSI (REMOTE) ---
+|User (Fisik)|
+:Tekan Tombol Remote;
+
+|Hardware (ESP32)|
+:Sensor Menerima Sinyal IR;
+:Decode Kode Hex;
+
+if (Kode Terdaftar?) then (Tidak)
+    :Abaikan Sinyal (Error);
+    stop
+else (Ya)
+    :Set Status (ON/OFF);
+    :Kirim Data ke Firebase;
+endif
+
+' --- BAGIAN 3: SINKRONISASI (REALTIME) ---
+|Firebase / Database|
+:Update Status di Database;
+:Broadcast Perubahan ke Admin;
+
+|Admin (Web)|
+:Menerima Data Baru (Realtime);
+:Update Tampilan Status Lampu;
+:Update Tabel Riwayat (Log);
+
+stop
+@enduml

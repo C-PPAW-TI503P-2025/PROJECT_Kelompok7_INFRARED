@@ -1,0 +1,49 @@
+@startuml
+!theme plain
+skinparam defaultTextAlignment center
+skinparam activity {
+    BackgroundColor White
+    BorderColor Black
+    ArrowColor Black
+    FontName Arial
+}
+
+title Flowchart Admin (Monitoring Only)
+
+start
+
+' --- BAGIAN 1: LOGIN (Tetap Ada) ---
+:Buka Halaman Web Admin<
+note right: Input URL
+
+:Input Username & Password<
+note right: Input Data
+
+:Validasi Akun]
+
+if (Password Benar?) then (Tidak)
+    :Tampilkan Pesan Error/
+    stop
+else (Ya)
+    :Masuk ke Dashboard]
+endif
+
+' --- BAGIAN 2: MONITORING (Read Only) ---
+:Request Data Status dari Firebase|
+note right: Read Database
+
+:Tampilkan Status Lampu (Realtime)/
+note right: Output Visual\n(Misal: Teks "ON")
+
+:Request Data Riwayat (Log) dari Firebase|
+note right: Read History
+
+:Tampilkan Tabel Log Aktivitas/
+note right: Output Visual\n(Daftar jam berapa ditekan)
+
+' --- TIDAK ADA AKSI EDIT/KONTROL ---
+
+:Logout / Tutup Halaman]
+
+stop
+@enduml

@@ -1,0 +1,110 @@
+@startuml
+skinparam linetype ortho
+skinparam defaultFontName Arial
+skinparam roundCorner 10
+
+' --- SETTING JARAK AGAR LEGA (JANGAN DIUBAH) ---
+skinparam ranksep 150
+skinparam nodesep 80
+skinparam packagePadding 30
+skinparam packageTitleAlignment center
+
+' --- STYLING WARNA ---
+skinparam package {
+    BackgroundColor White
+    BorderColor DimGray
+    FontColor Black
+    FontStyle Bold
+    FontSize 13
+}
+skinparam component {
+    BackgroundColor #F9F9F9
+    BorderColor SlateGray
+    ArrowColor Black
+}
+skinparam database {
+    BackgroundColor #E3F2FD
+    BorderColor Blue
+}
+skinparam node {
+    BackgroundColor #E8F5E9
+    BorderColor DarkGreen
+}
+
+title Arsitektur Sistem (Fixed: Teks Tidak Menumpuk Garis)
+
+' ==========================================
+' 1. CLIENT LAYER
+' ==========================================
+package "1. Client Layer" {
+    component "Web Browser\n(Google Chrome / Edge)" as Browser {
+        rectangle "Dashboard Admin UI" {
+            component "Login View" as UI_Login
+            component "Monitoring View" as UI_Monitor
+        }
+    }
+}
+
+' ==========================================
+' 2. SERVER LAYER
+' ==========================================
+package "2. Server Layer" {
+    component "Firebase Authentication\n(Auth Service)" as AuthServer {
+        note right of AuthServer
+          Logika Keamanan
+          & Validasi Login
+        end note
+    }
+}
+
+' ==========================================
+' 3. DATABASE LAYER
+' ==========================================
+package "3. Database Layer" {
+    database "Firebase Realtime DB\n(NoSQL Cloud Storage)" as DB {
+        note right of DB
+          Menyimpan:
+          - Status (ON/OFF)
+          - Log Riwayat
+          - Data Admin
+        end note
+    }
+}
+
+' ==========================================
+' 4. IOT LAYER
+' ==========================================
+package "4. IoT Layer" {
+    node "Microcontroller Unit" {
+        component "ESP32 Dev Module" as ESP32
+        component "IR Receiver Sensor" as Sensor
+    }
+    component "Remote Control\n(Fisik)" as Remote
+}
+
+' ==========================================
+' ALUR KOMUNIKASI DATA (DENGAN TRIK SPASI)
+' ==========================================
+
+' B. Alur Server (Validasi Login)
+' TRIK: Menambah \n\n di akhir teks agar teks NAIK ke atas (menjauh dari server layer)
+UI_Login -down-> AuthServer : 4. Request Login\n\n
+
+' TRIK: Menambah \n\n di awal teks agar teks TURUN ke bawah (menjauh dari client layer)
+AuthServer .up.> UI_Login : \n\nToken Akses (Valid)
+
+' C. Alur Database (Monitoring Realtime)
+' Teks ditaruh agak jauh
+DB .up.> UI_Monitor : 5. Sinkronisasi Data (Realtime)\nvia WebSocket
+
+' A. Alur IoT (Hardware ke Database)
+Remote -down-> Sensor : 1. Sinyal Inframerah
+Sensor -right-> ESP32 : 2. Decode Hex
+ESP32 -up-> DB : 3. Kirim Status (Write Data)\nvia Wi-Fi (HTTPS)
+
+' --- HIDDEN LINES UNTUK MERAPIKAN POSISI ---
+Browser -[hidden]down- AuthServer
+AuthServer -[hidden]down- DB
+DB -[hidden]down- ESP32
+
+@enduml
