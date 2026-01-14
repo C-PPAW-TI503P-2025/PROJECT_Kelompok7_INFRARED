@@ -77,9 +77,9 @@ package "3. Database Layer" {
 package "4. IoT Layer" {
     node "Microcontroller Unit" {
         component "ESP32 Dev Module" as ESP32
-        component "IR Receiver Sensor" as Sensor
+        component "IR Obstacle Sensor" as Sensor
     }
-    component "Remote Control\n(Fisik)" as Remote
+    component "Objek\n(Fisik)" as Remote
 }
 
 ' ==========================================

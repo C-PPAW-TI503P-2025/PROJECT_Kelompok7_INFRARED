@@ -2,75 +2,77 @@
 skinparam classAttributeIconSize 0
 skinparam linetype ortho
 
-title Class Diagram: Sistem Monitoring IoT (Sinkron dengan ERD)
+title Class Diagram: Sistem Monitoring IoT (ESP32 + Obstacle + NTP)
 
 ' --- PAKET 1: FIRMWARE (ESP32 / C++) ---
 package "Firmware (Hardware Logic)" {
     
-    class "IR_Receiver_Driver" as Sensor {
+    class "Obstacle_Sensor_Driver" as Sensor {
         - pin : int
-        - protocol : String
         + setup() : void
-        + decodeSignal() : String
+        + readState() : int
+        ' (Return: LOW/HIGH)
+    }
+
+    class "NTP_Time_Client" as TimeClient {
+        - ntpServer : String
+        - gmtOffset : long
+        + configTime() : void
+        + getJamSekarang() : String
+        ' (Return: "dd/mm/yyyy, HH:mm:ss")
     }
 
     class "Main_Controller" as ESP32 {
         - wifi_ssid : String
-        - wifi_pass : String
         - firebase_host : String
-        - current_status : bool
+        - status_terakhir : String
         --
-        + setupWiFi() : void
-        + connectFirebase() : void
-        + handleIRInput(hexCode: String) : void
-        + uploadStatus(status: String) : void
+        + setup() : void
+        + loop() : void
+        + connectToWiFi() : void
+        + sendDataToFirebase(status, waktu) : void
     }
 }
 
-' --- PAKET 2: DATA LAYER (DATABASE MODELS) ---
-' Bagian ini sekarang PERSIS sama dengan ERD kamu
-package "Data Layer (Sesuai ERD)" {
+' --- PAKET 2: DATA LAYER (Sesuai ERD Terakhir) ---
+package "Data Layer (Firebase)" {
     
     class "Admin" as AdminModel {
-        + admin_id : String
+        + uid : String
         + email : String
         + password : String
     }
 
     class "Virtual_Object" as ObjModel {
-        + object_id : String
-        + nama_objek : String
+        + node_key : String
         + status_sekarang : String
-        + terakhir_update : DateTime
+        + waktu_update : String
+        + waktu_mulai_online : String
     }
-
-    class "Remote_Log" as LogModel {
-        + log_id : String
-        + object_id : String
-        + waktu_tekan : DateTime
-        + kode_ir_diterima : String
-        + status_setelahnya : String
-    }
+    
+    note bottom of ObjModel
+        Tidak ada Remote_Log
+        karena sistem menimpa data (Update)
+    end note
 }
 
-' --- PAKET 3: WEB APPLICATION (FRONTEND) ---
+' --- PAKET 3: WEB APPLICATION (FRONTEND / JS) ---
 package "Web Application (Frontend)" {
 
     class "Dashboard_UI" as View {
-        - canvas_element : Object
-        - current_image : String
+        - visual_lampu : DOM_Element
+        - text_status : DOM_Element
         --
         + initFirebaseListener() : void
-        + renderImage(status: String) : void
-        + updateLogTable(logs: List) : void
-        + showNotification(msg: String) : void
+        + updateTampilan(data) : void
+        + checkOfflineStatus(lastSeenTime) : void
+        ' (Logika hitung selisih 15 detik)
     }
 
     class "Auth_Manager" as Auth {
-        - current_user : User
-        + login(email, pass) : bool
+        + login(email, pass) : Promise
         + logout() : void
-        + checkSession() : bool
+        + onAuthStateChanged() : void
     }
 }
 
@@ -79,21 +81,21 @@ package "Web Application (Frontend)" {
 ' ===================================
 
 ' 1. Hubungan di Hardware
-ESP32 "1" --> "1" Sensor : uses >
+ESP32 "1" --> "1" Sensor : reads >
+ESP32 "1" --> "1" TimeClient : gets time from >
 
 ' 2. Hubungan ke Data (Dependency)
-ESP32 ..> ObjModel : updates (status_sekarang) >
-ESP32 ..> LogModel : creates (Remote_Log) >
+' ESP32 mengupdate data status dan waktu ke model objek
+ESP32 ..> ObjModel : updates (status & timestamp) >
 
 ' 3. Hubungan di Web
-' Auth Manager mengecek data ke Model Admin
-Auth ..> AdminModel : verifies (email & password) >
+' Auth Manager mengurus login admin
+Auth ..> AdminModel : authenticates >
 
-' Dashboard butuh Login dulu
-View ..> Auth : requires access >
+' Dashboard butuh akses Auth (Login dulu)
+View ..> Auth : requires session >
 
-' Dashboard membaca data model
-View ..> ObjModel : reads (status_sekarang) >
-View ..> LogModel : reads (riwayat) >
+' Dashboard membaca data dari Virtual Object secara Realtime
+View ..> ObjModel : subscribes/listens >
 
 @enduml

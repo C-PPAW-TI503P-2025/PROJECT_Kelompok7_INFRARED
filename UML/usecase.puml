@@ -2,59 +2,42 @@
 left to right direction
 skinparam packageStyle rectangle
 
-' --- ACTORS (HANYA MANUSIA) ---
 actor "User (Fisik)" as user
 actor "Admin (Web)" as admin
 
-rectangle "Sistem IoT Remote & Web (Monitoring)" {
+rectangle "Sistem Monitoring IoT" {
+  
+  ' --- Bagian Hardware (Otomatis oleh Sistem) ---
+  usecase "Memicu Sensor (Gerakan Tangan)" as UC1
+  usecase "Update Status & Waktu ke Firebase" as UC2
 
-    ' --- KELOMPOK FITUR USER ---
-    usecase "Tekan Tombol Remote" as UC_Press
-    usecase "Validasi Sinyal IR" as UC_Validate
-    usecase "Simpan Data ke Firebase" as UC_Save
-    usecase "Abaikan Sinyal (Error)" as UC_Error
-
-    ' --- KELOMPOK FITUR ADMIN ---
-    usecase "Login Admin" as UC_Login
-    usecase "Logout" as UC_Logout
-    usecase "Lupa Password" as UC_Forgot
-    usecase "Lihat Dashboard" as UC_View
-    usecase "Tampilkan Data Realtime" as UC_Display
+  ' --- Bagian Website (Interaksi Admin) ---
+  usecase "Login Admin" as UC3
+  usecase "Logout" as UC4
+  usecase "Akses Dashboard Monitoring" as UC8
+  
+  ' Fitur di dalam Dashboard
+  usecase "Lihat Status Real-time (Lampu)" as UC5
+  usecase "Lihat Waktu Update (NTP)" as UC6
 }
 
-' =========================================
-' HUBUNGAN (ALUR LOGIKA)
-' =========================================
+' === RELASI HARDWARE ===
+user --> UC1
+UC1 ..> UC2 : <<include>> (Otomatis)
 
-' --- 1. SISI USER ---
-user --> UC_Press
+' === RELASI WEBSITE ===
+' 1. Admin masuk ke sistem
+admin --> UC3 : Input Email & Pass
 
-' INCLUDE: Tekan tombol -> Wajib Validasi
-UC_Press ..> UC_Validate : <<include>>
+' 2. Aturan Dashboard
+' (Membuka Dashboard otomatis butuh Login)
+UC3 ..> UC8 : <<include>> 
 
-' INCLUDE: Validasi sukses -> Wajib Simpan Data (Internal)
-UC_Validate ..> UC_Save : <<include>>
+' (Di dalam Dashboard terdapat 3 fitur utama)
+UC8 ..> UC5 : <<include>>
+UC8 ..> UC6 : <<include>>
 
-' EXTEND: Jika kode salah -> Error
-UC_Validate <.. UC_Error : <<extend>>
-
-
-' --- 2. SISI ADMIN ---
-' Admin bisa melakukan Login dan Logout
-admin --> UC_Login
-UC_Login <.. UC_Logout : <<extend>>
-
-' EXTEND: Jika lupa sandi saat login
-UC_Login <.. UC_Forgot : <<extend>>
-
-' INCLUDE: Login sukses -> Langsung masuk Dashboard
-UC_Login ..> UC_View : <<include>>
-
-' INCLUDE: Saat Dashboard terbuka -> Sistem WAJIB menampilkan data
-UC_View ..> UC_Display : <<include>>
-
-' (Opsional) Logout dilakukan saat di Dashboard
-' UC_View <.. UC_Logout : <<extend>> 
-' Tapi ditarik garis langsung dari Admin (seperti di atas) lebih umum dan jelas.
+' 3. Logout dilakukan dari dalam Dashboard
+UC4 .> UC3 : <<extend>>
 
 @enduml

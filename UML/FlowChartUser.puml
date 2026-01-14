@@ -2,7 +2,7 @@
 !theme plain
 skinparam defaultTextAlignment center
 
-' --- DEFINISI SIMBOL AGAR SESUAI STANDAR ---
+' --- DEFINISI STYLE ---
 skinparam activity {
     BackgroundColor White
     BorderColor Black
@@ -12,46 +12,53 @@ skinparam activity {
 
 start
 
-' Simbol Jajar Genjang = INPUT
-:User Menekan Tombol Remote<
-note right: Input Manual
+' === BAGIAN HARDWARE (ESP32) ===
 
 ' Simbol Jajar Genjang = INPUT
-:Sensor IR Menerima Sinyal<
+:User Mendekatkan Tangan/Objek<
+note right: Input Fisik
+
+' Simbol Jajar Genjang = INPUT
+:Sensor IR Obstacle Mendeteksi (LOW)<
 note right: Input Hardware
 
 ' Simbol Persegi = PROSES
-:ESP32 Decode Kode Hex]
+:ESP32 Membaca Pin Digital]
+
+' Simbol Persegi = PROSES (Baru: Ambil Jam)
+:Ambil Waktu dari Server NTP (Internet)]
 
 ' Simbol Belah Ketupat = DECISION
-if (Apakah Kode Terdaftar?) then (Tidak)
-    :Abaikan Sinyal]
-    stop
-else (Ya)
+if (Apakah Ada Halangan?) then (Tidak / HIGH)
     ' Simbol Persegi = PROSES
-    :Set Status Lampu (ON/OFF)]
+    :Set Status = OFF]
+else (Ya / LOW)
+    ' Simbol Persegi = PROSES
+    :Set Status = ON]
 endif
 
 ' Simbol Tabung = DATABASE
-:Simpan ke Firebase (Cloud DB)|
-note right: Storage
+:Simpan Status & Waktu ke Firebase|
+note right: Cloud Database
 
-' Simbol Jajar Genjang = OUTPUT (Kirim Data)
-:Broadcast Data ke Web<
+' === BAGIAN WEBSITE (SOFTWARE) ===
 
 ' Simbol Jajar Genjang = INPUT (Web Menerima)
-:Website Menerima Data Baru<
+:Website Menerima Perubahan Data<
 
 ' Simbol Belah Ketupat = DECISION
 if (Status == ON?) then (Ya)
     ' Simbol Persegi = PROSES
-    :Set Gambar = Lampu Nyala]
+    :Ubah Visual Lampu = NYALA (Hijau)]
 else (Tidak)
-    :Set Gambar = Lampu Mati]
+    :Ubah Visual Lampu = MATI (Hitam/abu-abu)]
 endif
 
+' Simbol Persegi = PROSES
+:Konversi Timestamp jadi Jam Terbaca]
+
 ' Simbol Jajar Genjang = OUTPUT (Tampilan)
-:Render Tampilan di Layar Monitor/
+:Tampilkan Status & Jam di Monitor/
 note right: Output Visual
 
 stop

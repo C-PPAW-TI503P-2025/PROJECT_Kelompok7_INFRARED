@@ -6,40 +6,32 @@ skinparam entity {
     ArrowColor Black
 }
 
-' --- 1. TABEL UNTUK LOGIN (WAJIB ADA KARENA FLOWCHART) ---
+' --- 1. TABEL USER/ADMIN (FIREBASE AUTHENTICATION) ---
 entity "Admin" as admin {
-    *admin_id : String <<PK>>
+    *uid : String <<PK>>
     --
     email : String
     password : String
+    update_at : DateTime
 }
 
-' --- 2. TABEL UNTUK STATUS LAMPU (YANG KAMU BUAT) ---
+' --- 2. TABEL STATUS SENSOR (REALTIME DATABASE) ---
+' Ini merepresentasikan node "Virtual_Object" di Firebase
 entity "Virtual_Object" as object {
-    *object_id : String <<PK>>
+    *node_key : String <<PK>>
     --
-    nama_objek : String
     status_sekarang : String
-    ' (Isinya: ON atau OFF)
-    terakhir_update : DateTime
-}
-
-' --- 3. TABEL RIWAYAT (YANG KAMU BUAT) ---
-entity "Remote_Log" as log {
-    *log_id : String <<PK>>
-    --
-    *object_id : String <<FK>>
-    waktu_tekan : DateTime
-    kode_ir_diterima : String
-    status_setelahnya : String
+    ' (Isinya: "ON" atau "OFF")
+    waktu_update : String
+    ' (Waktu saat sensor terakhir mendeteksi tangan)
+    waktu_mulai_online : String
+    ' (Waktu saat ESP32 pertama kali dinyalakan)
 }
 
 ' --- HUBUNGAN ---
 
-' Satu Lampu punya banyak riwayat log
-object ||..o{ log : "memiliki riwayat"
-
-' Admin memantau Objek (Bisa dibuat putus-putus kalau tidak strict)
-admin }|..|{ object : "memantau"
+' Admin memantau Objek lewat Dashboard
+' One-to-One (Satu Admin memantau Satu Sistem Dashboard)
+admin ||..|| object : "monitoring"
 
 @enduml

@@ -29,7 +29,7 @@ database "Realtime DB\n(Storage)" as DB
 
 ' 1. PROSES DI ALAT
 ' (Tanpa activate, langsung panah ke diri sendiri)
-ESP32 -> ESP32 : Terima Sinyal Remote\n& Decode Hex
+ESP32 -> ESP32 : Terima Sinyal Objek\n& Decode Hex
 note left: Proses Internal\n(Hardware)
 
 ' Jarak Kosong
