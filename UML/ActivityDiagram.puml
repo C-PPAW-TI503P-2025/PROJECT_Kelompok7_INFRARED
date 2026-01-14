@@ -8,13 +8,13 @@ title Activity Diagram: Monitoring IoT (User Fisik & Admin Web)
 |Admin (Web)|
 
 ' --- BAGIAN 1: ADMIN LOGIN (PERSIAPAN) ---
-|Admin (Web)|
+|Admin (Web)|\
 start
 :Buka Halaman Web Admin;
-:Input Username & Password;
+:Input Email & Password;
 
 if (Password Benar?) then (Tidak)
-    :Tampilkan Pesan Error;
+    :Tampilkan Pesan "Email atau Password salah";
     detach
 else (Ya)
     :Masuk ke Dashboard;
@@ -33,19 +33,14 @@ end note
 
 ' --- BAGIAN 2: USER BERAKSI (REMOTE) ---
 |User (Fisik)|
-:Tekan Tombol Remote;
+:Arahkan ke objek;
 
 |Hardware (ESP32)|
 :Sensor Menerima Sinyal IR;
 :Decode Kode Hex;
+:Set Status (ON/OFF);
+:Kirim Data ke Firebase;
 
-if (Kode Terdaftar?) then (Tidak)
-    :Abaikan Sinyal (Error);
-    stop
-else (Ya)
-    :Set Status (ON/OFF);
-    :Kirim Data ke Firebase;
-endif
 
 ' --- BAGIAN 3: SINKRONISASI (REALTIME) ---
 |Firebase / Database|

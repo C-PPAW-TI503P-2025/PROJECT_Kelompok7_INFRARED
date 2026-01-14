@@ -16,13 +16,13 @@ start
 :Buka Halaman Web Admin<
 note right: Input URL
 
-:Input Username & Password<
+:Input Email & Password<
 note right: Input Data
 
 :Validasi Akun]
 
 if (Password Benar?) then (Tidak)
-    :Tampilkan Pesan Error/
+    :Tampilkan Pesan "Email atau Password salah"/
     stop
 else (Ya)
     :Masuk ke Dashboard]
