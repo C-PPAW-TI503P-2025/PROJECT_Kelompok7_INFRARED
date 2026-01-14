@@ -8,7 +8,7 @@ title Activity Diagram: Monitoring IoT (User Fisik & Admin Web)
 |Admin (Web)|
 
 ' --- BAGIAN 1: ADMIN LOGIN (PERSIAPAN) ---
-|Admin (Web)|\
+|Admin (Web)|
 start
 :Buka Halaman Web Admin;
 :Input Email & Password;
